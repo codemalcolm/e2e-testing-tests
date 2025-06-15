@@ -1,19 +1,29 @@
-// @ts-check
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+// Checking for a 403 status code from a network response
+test("Dashboard access denied", async ({ page }) => {
+  let isForbidden = false;
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Faster/);
-});
+  // server port is 5000
+  page.on("response", (response) => {
+    if (
+      response.url() === "http://localhost:5000/dashboard" &&
+      response.status() === 403
+    ) {
+      isForbidden = true;
+    }
+  });
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+  // navigating to actual /dashboard FE route
+  await page.goto("http://localhost:3000/dashboard");
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
+  await page
+    .waitForResponse(
+      (response) =>
+        response.url() === "http://localhost:5000/dashboard" &&
+        response.status() === 403
+    )
+    .catch(() => {});
 
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+  expect(isForbidden).toBe(true);
 });
