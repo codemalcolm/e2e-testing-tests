@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { REGISTER_CLIENT, REGISTER_SERVER, STATUS_CODE_CREATED, STATUS_CODE_FORBIDDEN,}  from "../variables";
+import { REGISTER_CLIENT, REGISTER_SERVER, STATUS_CODE_BAD_REQUEST, STATUS_CODE_CREATED, STATUS_CODE_FORBIDDEN,}  from "../variables";
 
 test("Should allow to register User", async ({ page }) => {
   let isRegistered = false;
@@ -57,7 +57,7 @@ test("Should not allow to register User", async ({ page }) => {
     await page.waitForResponse(
       (response) =>
         response.url() === REGISTER_SERVER &&
-        response.status() === STATUS_CODE_FORBIDDEN
+        response.status() === STATUS_CODE_BAD_REQUEST
     );
   } catch (error) {
     console.error("201 response for registration was not received:", error);
