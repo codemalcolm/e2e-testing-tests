@@ -8,10 +8,6 @@ export const LOGIN_SERVER = "http://localhost:5000/login";
 export const LOGIN_CLIENT = "http://localhost:3000/login";
 
 export const STATUS_CODE_FORBIDDEN = 403;
+export const STATUS_CODE_BAD_REQUEST = 400;
 export const STATUS_CODE_CREATED = 201;
 export const STATUS_CODE_SUCCESS = 200;
-
-
-
-
-
