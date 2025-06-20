@@ -63,17 +63,14 @@ test("Should deny access", async ({ page }) => {
   await page.fill('input[placeholder="Username"]', "unknownUser");
   await page.fill('input[placeholder="Password"]', "password123");
 
-  const badRequestPromise = page.waitForResponse(
-    response =>
-      response.url() === LOGIN_SERVER &&
-      response.status() === STATUS_CODE_BAD_REQUEST,
-    { timeout: 5_000 }
-  );  
+  await page.click('button:text("Login")');
 
-    await page.click('button:text("Login")');
-
- try {
-    await badRequestPromise;
+  try {
+    await page.waitForResponse(
+      (response) =>
+        response.url() === LOGIN_SERVER &&
+        response.status() === STATUS_CODE_BAD_REQUEST
+    );
   } catch (error) {
     console.error("400 response for login was not received:", error);
   }
