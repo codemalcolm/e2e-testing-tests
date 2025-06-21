@@ -1,79 +1,105 @@
-import { test, expect, } from "@playwright/test";
-import { LOGIN_CLIENT, LOGIN_SERVER, REGISTER_CLIENT, REGISTER_SERVER } from "../url";
-import { STATUS_CODE_CREATED, STATUS_CODE_SUCCESS } from "../statuscode";
+import { test, expect } from "@playwright/test";
+import {
+  REGISTER_CLIENT,
+  REGISTER_SERVER,
+  LOGIN_CLIENT,
+  LOGIN_SERVER,
+  DASHBOARD_CLIENT,
+  DASHBOARD_SERVER,
+  USER_INFO_CLIENT,
+  USER_INFO_SERVER,
+} from "../url";
+import {
+  STATUS_CODE_CREATED,
+  STATUS_CODE_SUCCESS,
+  STATUS_CODE_FORBIDDEN,
+} from "../statuscode";
 
-test.beforeEach(async ({ page }) => {
+test.describe("Auth / Logout flow", () => {
+  const USER = { username: "e2euser", password: "password123" };
 
-    register(page);
-    login(page);
-
-})
-
-
-test("Should deny access after logout", async ({ page }) => {
-
-        await page.goto()
-
-
-
-
-})
-
-
-
-
-const register = async (page) => {
-
-    await page.goto(REGISTER_CLIENT);
-
-    await page.fill('input[placeholder="Username"]', "users");
-    await page.fill('input[placeholder="Password"]', "263");
-
-    await page.click('button:text("Register")');
-
-    try {
-        await page.waitForResponse(
-            (response) =>
-                response.url() === REGISTER_SERVER &&
-                response.status() === STATUS_CODE_CREATED
-        );
-    } catch (error) {
-        console.error("201 response for registration was not received:", error);
-    }
-
-    expect(isRegistered).toBe(true);
-
-}
-
-
-const login = async (page) => {
-    let isLoggedIn = false;
-
-    page.on("response", (response) => {
-        if (
-            response.url() === LOGIN_SERVER &&
-            response.status() === STATUS_CODE_SUCCESS
-        ) {
-            isLoggedIn = true;
-        }
+  // Helper methods
+  async function register(page, username, password) {
+    let sawCreated = false;
+    page.on("response", response => {
+      if (
+        response.url() === REGISTER_SERVER &&
+        response.status() === STATUS_CODE_CREATED
+      ) {
+        sawCreated = true;
+      }
     });
+    await page.goto(REGISTER_CLIENT);
+    await page.fill('input[placeholder="Username"]', username);
+    await page.fill('input[placeholder="Password"]', password);
+    await page.click('button:text("Register")');
+    await page.waitForResponse(
+      r => r.url() === REGISTER_SERVER && r.status() === STATUS_CODE_CREATED
+    );
+    expect(sawCreated).toBe(true);
+  }
 
+  async function login(page, username, password) {
+    let sawLogin = false;
+    page.on("response", response => {
+      if (
+        response.url() === LOGIN_SERVER &&
+        response.status() === STATUS_CODE_SUCCESS
+      ) {
+        sawLogin = true;
+      }
+    });
     await page.goto(LOGIN_CLIENT);
-
-    await page.fill('input[placeholder="Username"]', "e2euser");
-    await page.fill('input[placeholder="Password"]', "password123");
-
+    await page.fill('input[placeholder="Username"]', username);
+    await page.fill('input[placeholder="Password"]', password);
     await page.click('button:text("Login")');
+    await page.waitForResponse(
+      r => r.url() === LOGIN_SERVER && r.status() === STATUS_CODE_SUCCESS
+    );
+    expect(sawLogin).toBe(true);
+  }
 
-    try {
-        await page.waitForResponse(
-            (response) =>
-                response.url() === LOGIN_SERVER &&
-                response.status() === STATUS_CODE_SUCCESS
-        );
-    } catch (error) {
-        console.error("200 response for login was not received:", error);
-    }
+  test.beforeEach(async ({ page }) => {
+    await register(page, USER.username, USER.password);
+    await login(page, USER.username, USER.password);
+  });
 
-    expect(isLoggedIn).toBe(true);
-}
+  test("Should fetch user info, then logout and deny dashboard access", async ({ page }) => {
+    // fetch user info when logged in
+    let sawUserInfo = false;
+    page.on("response", response => {
+      if (
+        response.url() === USER_INFO_SERVER &&
+        response.status() === STATUS_CODE_SUCCESS
+      ) {
+        sawUserInfo = true;
+      }
+    });
+    
+    await page.goto(USER_INFO_CLIENT);
+    await page.waitForResponse(
+      r => r.url() === USER_INFO_SERVER && r.status() === STATUS_CODE_SUCCESS
+    );
+    expect(sawUserInfo).toBe(true);
+
+    // perform logout
+    await page.click('button:text("Logout")');
+    await page.context().clearCookies();
+
+    // dashboard access should now be forbidden
+    let isForbiddenAfter = false;
+    page.on("response", response => {
+      if (
+        response.url() === DASHBOARD_SERVER &&
+        response.status() === STATUS_CODE_FORBIDDEN
+      ) {
+        isForbiddenAfter = true;
+      }
+    });
+    await page.goto(DASHBOARD_CLIENT);
+    await page.waitForResponse(
+      r => r.url() === DASHBOARD_SERVER && r.status() === STATUS_CODE_FORBIDDEN
+    );
+    expect(isForbiddenAfter).toBe(true);
+  });
+});
