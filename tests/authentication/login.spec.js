@@ -10,13 +10,14 @@ import {
   STATUS_CODE_SUCCESS,
   STATUS_CODE_BAD_REQUEST
 } from "../statuscode";
+import { USER, UNKNOWN_USER} from "../user-data"
 
 test.beforeEach(async ({ page }) => {
 
   await page.goto(REGISTER_CLIENT);
 
-  await page.fill('input[placeholder="Username"]', "users");
-  await page.fill('input[placeholder="Password"]', "263");
+  await page.fill('input[placeholder="Username"]', USER.username);
+  await page.fill('input[placeholder="Password"]', USER.password);
 
   await page.click('button:text("Register")');
 
@@ -37,8 +38,8 @@ test("Should allow to login User", async ({ page }) => {
 
   await page.goto(LOGIN_CLIENT);
 
-  await page.fill('input[placeholder="Username"]', "e2euser");
-  await page.fill('input[placeholder="Password"]', "password123");
+  await page.fill('input[placeholder="Username"]', USER.username);
+  await page.fill('input[placeholder="Password"]', USER.password);
 
   await page.click('button:text("Login")');
 
@@ -56,7 +57,7 @@ test("Should allow to login User", async ({ page }) => {
 });
 
 
-test("Should deny access", async ({ page }) => {
+test("Should deny access without an unregistered user", async ({ page }) => {
   let isLoggedIn = false;
 
   page.on("response", (response) => {
@@ -69,8 +70,8 @@ test("Should deny access", async ({ page }) => {
   });
 
   await page.goto(LOGIN_CLIENT);
-  await page.fill('input[placeholder="Username"]', "unknownUser");
-  await page.fill('input[placeholder="Password"]', "password123");
+  await page.fill('input[placeholder="Username"]', UNKNOWN_USER.username);
+  await page.fill('input[placeholder="Password"]', UNKNOWN_USER.password);
 
   await page.click('button:text("Login")');
 
@@ -90,8 +91,8 @@ test("Should deny access", async ({ page }) => {
 
 test("should return user info", async ({ page }) => {
   await page.goto(LOGIN_CLIENT);
-  await page.fill('input[placeholder="Username"]', "e2euser");
-  await page.fill('input[placeholder="Password"]', "password123");
+  await page.fill('input[placeholder="Username"]', USER.username);
+  await page.fill('input[placeholder="Password"]', USER.password);
   await page.click('button:text("Login")');
 
   await page.waitForResponse(
@@ -110,7 +111,7 @@ test("should return user info", async ({ page }) => {
 
   const payload = await userInfoResponse.json();
   expect(payload).toHaveProperty("_id");
-  expect(payload.username).toBe("e2euser");
+  expect(payload.username).toBe(USER.username);
 
-  await expect(page.locator("text=Username: e2euser")).toBeVisible();
+  await expect(page.locator("text=Username: " + USER.username)).toBeVisible();
 });

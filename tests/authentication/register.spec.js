@@ -10,6 +10,9 @@ import {
 STATUS_CODE_CREATED,
 STATUS_CODE_BAD_REQUEST
 } from "../statuscode";
+import{
+  USER
+} from "../user-data"
 
 test("Should allow to register User", async ({ page }) => {
   let isRegistered = false;
@@ -25,8 +28,8 @@ test("Should allow to register User", async ({ page }) => {
 
   await page.goto(REGISTER_CLIENT);
 
-  await page.fill('input[placeholder="Username"]', "users");
-  await page.fill('input[placeholder="Password"]', "263");
+  await page.fill('input[placeholder="Username"]', USER.username);
+  await page.fill('input[placeholder="Password"]', USER.password);
 
   await page.click('button:text("Register")');
 

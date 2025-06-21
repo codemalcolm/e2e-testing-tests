@@ -15,6 +15,9 @@ import {
   STATUS_CODE_SUCCESS,
   STATUS_CODE_FORBIDDEN,
 } from "../statuscode";
+import{
+  USER
+} from "../user-data"
 
 test("Shouldn't fetch user posts", async ({ page }) => {
   let isNotFetched = false;
@@ -54,8 +57,8 @@ test("Should allow editing username", async ({ page }) => {
     if (r.url() === LOGIN_SERVER && r.status() === STATUS_CODE_SUCCESS) loggedIn = true;
   });
   await page.goto(LOGIN_CLIENT);
-  await page.fill('input[placeholder="Username"]', "e2euser");
-  await page.fill('input[placeholder="Password"]', "password123");
+  await page.fill('input[placeholder="Username"]', USER.username);
+  await page.fill('input[placeholder="Password"]', USER.password);
   await Promise.all([
     page.waitForResponse(r => r.url() === LOGIN_SERVER && r.status() === STATUS_CODE_SUCCESS),
     page.click('button:text("Login")')
@@ -86,4 +89,3 @@ test("Should allow editing username", async ({ page }) => {
   await page.waitForResponse(r => r.url() === DASHBOARD_SERVER && r.status() === STATUS_CODE_SUCCESS);
   expect(dashOK).toBe(true);
 });
-

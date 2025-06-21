@@ -5,15 +5,19 @@ import {
   USER_INFO_CLIENT,
   USER_POSTS_SERVER,
 } from "../url";
-import { STATUS_CODE_SUCCESS } from "../statuscode";
+import { 
+  STATUS_CODE_SUCCESS } from "../statuscode";
+import {
+  USER
+} from "../user-data"
 
 // TODO : CLEAN UP THIS CODE !
 
 test.beforeEach(async ({ page }) => {
   await page.goto(LOGIN_CLIENT);
 
-  await page.fill('input[placeholder="Username"]', "e2euser");
-  await page.fill('input[placeholder="Password"]', "password123");
+  await page.fill('input[placeholder="Username"]', USER.username);
+  await page.fill('input[placeholder="Password"]', USER.password);
 
   await page.click('button:text("Login")');
 

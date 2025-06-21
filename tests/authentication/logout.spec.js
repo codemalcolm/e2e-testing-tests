@@ -14,9 +14,10 @@ import {
     STATUS_CODE_SUCCESS,
     STATUS_CODE_FORBIDDEN,
 } from "../statuscode";
-
-test.describe("Auth / Logout flow", () => {
-    const USER = { username: "e2euser", password: "password123" };
+import{
+    USER 
+ } from "../user-data"
+    
 
     // Helper methods
     async function register(page, username, password) {
@@ -102,4 +103,3 @@ test.describe("Auth / Logout flow", () => {
         );
         expect(isForbiddenAfter).toBe(true);
     });
-});
