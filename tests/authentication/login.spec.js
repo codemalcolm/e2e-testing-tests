@@ -1,6 +1,6 @@
 import { test, expect,} from "@playwright/test";
-import { LOGIN_CLIENT, LOGIN_SERVER, REGISTER_CLIENT, REGISTER_SERVER, STATUS_CODE_BAD_REQUEST, STATUS_CODE_CREATED, STATUS_CODE_FORBIDDEN, STATUS_CODE_SUCCESS }  from "../variables";
-
+import { LOGIN_CLIENT, LOGIN_SERVER, REGISTER_CLIENT, USER_INFO_CLIENT, USER_INFO_SERVER  }  from "../url";
+import { STATUS_CODE_SUCCESS, STATUS_CODE_BAD_REQUEST} from "../statuscode";
 
 test.beforeEach(async({page}) =>{
 
@@ -76,4 +76,32 @@ test("Should deny access", async ({ page }) => {
   }
 
   expect(isLoggedIn).toBe(false);
+});
+
+
+test("should return user info", async ({ page }) => {
+  await page.goto(LOGIN_CLIENT);
+  await page.fill('input[placeholder="Username"]', "e2euser");
+  await page.fill('input[placeholder="Password"]', "password123");
+  await page.click('button:text("Login")');
+
+  await page.waitForResponse(
+    response =>
+      response.url() === LOGIN_SERVER &&
+      response.status() === STATUS_CODE_SUCCESS
+  );
+
+  await page.goto(USER_INFO_CLIENT);
+
+  const userInfoResponse = await page.waitForResponse(
+    response =>
+      response.url() === USER_INFO_SERVER &&
+      response.status() === STATUS_CODE_SUCCESS
+  );
+
+  const payload = await userInfoResponse.json();
+  expect(payload).toHaveProperty("_id");
+  expect(payload.username).toBe("e2euser");
+
+  await expect(page.locator("text=Username: e2euser")).toBeVisible();
 });

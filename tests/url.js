@@ -7,8 +7,6 @@ export const LOGIN_CLIENT = "http://localhost:3000/login";
 export const USER_INFO_SERVER = "http://localhost:5000/user-info";
 export const USER_INFO_CLIENT = "http://localhost:3000/user-page";
 export const USER_POSTS_SERVER = "http://localhost:5000/user-info/posts";
+export const HOMEPAGE_POST_CLIENT = "http://localhost:5000/posts"
+export const HOMEPAGE_POST_SERVER = "http://localhost:5000/posts"
 
-export const STATUS_CODE_FORBIDDEN = 403;
-export const STATUS_CODE_CREATED = 201;
-export const STATUS_CODE_SUCCESS = 200;
-export const STATUS_CODE_BAD_REQUEST = 400;

@@ -1,9 +1,6 @@
 import { test, expect } from "@playwright/test";
-import {
-  STATUS_CODE_FORBIDDEN,
-  USER_INFO_CLIENT,
-  USER_POSTS_SERVER,
-} from "../variables.js";
+import { USER_INFO_CLIENT, USER_POSTS_SERVER }  from "../url";
+import {STATUS_CODE_CREATED, STATUS_CODE_FORBIDDEN, STATUS_CODE_SUCCESS} from "../statuscode";
 
 test("Shouldn't fetch user posts", async ({ page }) => {
   let isNotFetched = false;

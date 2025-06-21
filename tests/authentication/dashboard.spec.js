@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { DASHBOARD_CLIENT, DASHBOARD_SERVER, LOGIN_CLIENT, LOGIN_SERVER, REGISTER_CLIENT, REGISTER_SERVER, STATUS_CODE_CREATED, STATUS_CODE_FORBIDDEN, STATUS_CODE_SUCCESS }  from "../variables";
+import { DASHBOARD_CLIENT, DASHBOARD_SERVER,   }  from "../url";
+import { STATUS_CODE_FORBIDDEN, } from "../statuscode";
 
 // Checking for a 403 status code from a network response
 test("Should not allow to access Dashboard", async ({ page }) => {
