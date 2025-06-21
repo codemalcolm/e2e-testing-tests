@@ -1,6 +1,14 @@
-import { test, expect } from "@playwright/test";
-import { USER_INFO_CLIENT, USER_POSTS_SERVER }  from "../url";
-import {STATUS_CODE_CREATED, STATUS_CODE_FORBIDDEN, STATUS_CODE_SUCCESS} from "../statuscode";
+import {
+  test,
+  expect
+} from "@playwright/test";
+import {
+  USER_INFO_CLIENT,
+  USER_POSTS_SERVER
+} from "../url";
+import {
+  STATUS_CODE_FORBIDDEN,
+} from "../statuscode";
 
 test("Shouldn't fetch user posts", async ({ page }) => {
   let isNotFetched = false;

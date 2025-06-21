@@ -1,6 +1,14 @@
-import { test, expect } from "@playwright/test";
-import { DASHBOARD_CLIENT, DASHBOARD_SERVER,   }  from "../url";
-import { STATUS_CODE_FORBIDDEN, } from "../statuscode";
+import {
+  test,
+  expect
+} from "@playwright/test";
+import {
+  DASHBOARD_CLIENT,
+  DASHBOARD_SERVER,
+} from "../url";
+import {
+  STATUS_CODE_FORBIDDEN,
+} from "../statuscode";
 
 // Checking for a 403 status code from a network response
 test("Should not allow to access Dashboard", async ({ page }) => {
@@ -9,7 +17,7 @@ test("Should not allow to access Dashboard", async ({ page }) => {
   // server port is 5000
   page.on("response", (response) => {
     if (
-      response.url() === DASHBOARD_SERVER  &&
+      response.url() === DASHBOARD_SERVER &&
       response.status() === STATUS_CODE_FORBIDDEN
     ) {
       isForbidden = true;

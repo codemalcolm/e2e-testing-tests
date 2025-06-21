@@ -1,10 +1,19 @@
-import { test, expect,} from "@playwright/test";
-import { LOGIN_CLIENT, LOGIN_SERVER, REGISTER_CLIENT, USER_INFO_CLIENT, USER_INFO_SERVER  }  from "../url";
-import { STATUS_CODE_SUCCESS, STATUS_CODE_BAD_REQUEST} from "../statuscode";
+import { test, expect, } from "@playwright/test";
+import {
+  LOGIN_CLIENT,
+  LOGIN_SERVER,
+  REGISTER_CLIENT,
+  USER_INFO_CLIENT,
+  USER_INFO_SERVER
+} from "../url";
+import {
+  STATUS_CODE_SUCCESS,
+  STATUS_CODE_BAD_REQUEST
+} from "../statuscode";
 
-test.beforeEach(async({page}) =>{
+test.beforeEach(async ({ page }) => {
 
- await page.goto(REGISTER_CLIENT);
+  await page.goto(REGISTER_CLIENT);
 
   await page.fill('input[placeholder="Username"]', "users");
   await page.fill('input[placeholder="Password"]', "263");
