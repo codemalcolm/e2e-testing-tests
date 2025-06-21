@@ -9,4 +9,7 @@ export const USER_INFO_CLIENT = "http://localhost:3000/user-page";
 export const USER_POSTS_SERVER = "http://localhost:5000/user-info/posts";
 export const HOMEPAGE_POST_CLIENT = "http://localhost:5000/posts"
 export const HOMEPAGE_POST_SERVER = "http://localhost:5000/posts"
+export const ALL_POST_SERVER = "http://localhost:5000/posts"
+export const ALL_DATA = "http://localhost:5000/data"
+
 
