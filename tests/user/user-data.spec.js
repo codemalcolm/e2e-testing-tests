@@ -7,7 +7,6 @@ import {
   USER_INFO_SERVER,
   DASHBOARD_CLIENT,
   DASHBOARD_SERVER,
-
 } from "../url";
 import { STATUS_CODE_SUCCESS, STATUS_CODE_FORBIDDEN } from "../statuscode";
 import { USER } from "../user-data";
@@ -50,10 +49,6 @@ async function login(page, username, password) {
   expect(response.status()).toBe(STATUS_CODE_SUCCESS);
 }
 
-  USER,
-  STATUS_CODE_SUCCESS,
-  STATUS_CODE_FORBIDDEN
-
 test("Shouldn't fetch user posts", async ({ page }) => {
   await page.goto(USER_INFO_CLIENT);
 
@@ -68,31 +63,15 @@ test("Shouldn't fetch user posts", async ({ page }) => {
   expect(response.status()).toBe(STATUS_CODE_FORBIDDEN);
 });
 
+// Test for editing username
 test("Should allow editing username", async ({ page }) => {
-<<<<<<< Updated upstream
   await register(page, USER.username, USER.password);
   await login(page, USER.username, USER.password);
-=======
-  let loggedIn = false;
-  page.on("response", r => {
-    if (r.url() === LOGIN_SERVER && r.status() === STATUS_CODE_SUCCESS) loggedIn = true;
-  });
-  await page.goto(LOGIN_CLIENT);
-  await page.fill('input[placeholder="Username"]', USER.username);
-  await page.fill('input[placeholder="Password"]', USER.password);
-  await Promise.all([
-    page.waitForResponse(r => r.url() === LOGIN_SERVER && r.status() === STATUS_CODE_SUCCESS),
-    page.click('button:text("Login")')
-  ]);
-  expect(loggedIn).toBe(true);
-
->>>>>>> Stashed changes
   await page.goto(USER_INFO_CLIENT);
   await page.waitForSelector('button:text("Edit Username")');
   await page.click('button:text("Edit Username")');
   await page.fill('input[placeholder="Enter new username"]', "updatedUser");
 
-<<<<<<< Updated upstream
   // Verify backend change
 
   const [response] = await Promise.all([
@@ -105,14 +84,9 @@ test("Should allow editing username", async ({ page }) => {
 
   expect(response.status()).toBe(STATUS_CODE_SUCCESS);
   const updated = await response.json();
-=======
-  let sawUpdate = false;
-  const updateResponse = await page.waitForResponse(r => r.url() === USER_INFO_SERVER && r.status() === STATUS_CODE_SUCCESS);
-  sawUpdate = updateResponse.ok();
-  const updated = await updateResponse.json();
->>>>>>> Stashed changes
   expect(updated.username).toBe("updatedUser");
 
+  // Verify access to dashboard now allowed (sanity)
   let dashOK = false;
   page.on("response", (r) => {
     if (r.url() === DASHBOARD_SERVER && r.status() === STATUS_CODE_SUCCESS)
