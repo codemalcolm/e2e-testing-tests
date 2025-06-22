@@ -11,47 +11,40 @@ import {
 } from "../url";
 import { STATUS_CODE_CREATED, STATUS_CODE_SUCCESS } from "../statuscode";
 import { USER } from "../user-data";
+import { HOMEPAGE_POST_SERVER } from "../utility";
 
 // TODO : CLEAN UP THIS CODE !
 
 async function register(page, username, password) {
-  let sawCreated = false;
-  page.on("response", (response) => {
-    if (
-      response.url() === REGISTER_SERVER &&
-      response.status() === STATUS_CODE_CREATED
-    ) {
-      sawCreated = true;
-    }
-  });
   await page.goto(REGISTER_CLIENT);
   await page.fill('input[placeholder="Username"]', username);
   await page.fill('input[placeholder="Password"]', password);
-  await page.click('button:text("Register")');
-  await page.waitForResponse(
-    (r) => r.url() === REGISTER_SERVER && r.status() === STATUS_CODE_CREATED
-  );
-  expect(sawCreated).toBe(true);
+
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        res.url() === REGISTER_SERVER && res.status() === STATUS_CODE_CREATED
+    ),
+    await page.click('button:text("Register")'),
+  ]);
+
+  expect(response.status()).toBe(STATUS_CODE_CREATED);
 }
 
 async function login(page, username, password) {
-  let sawLogin = false;
-  page.on("response", (response) => {
-    if (
-      response.url() === LOGIN_SERVER &&
-      response.status() === STATUS_CODE_SUCCESS
-    ) {
-      sawLogin = true;
-    }
-  });
   await page.goto(LOGIN_CLIENT);
   await page.fill('input[placeholder="Username"]', username);
   await page.fill('input[placeholder="Password"]', password);
-  await page.click('button:text("Login")');
-  await page.waitForResponse(
-    (r) => r.url() === LOGIN_SERVER && r.status() === STATUS_CODE_SUCCESS
-  );
-  expect(sawLogin).toBe(true);
+
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        res.url() === LOGIN_SERVER && res.status() === STATUS_CODE_SUCCESS
+    ),
+    await page.click('button:text("Login")'),
+  ]);
+
+  expect(response.status()).toBe(STATUS_CODE_SUCCESS);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -154,8 +147,7 @@ test("Should delete a post", async ({ page }) => {
 });
 
 test("Should edit a post", async ({ page }) => {
-  let isPostEditted = false;
-  const createdPostTitle = `Post for editting - ${Date.now()}`;
+  const createdPostTitle = `Post for Edit - ${Date.now()}`;
   const postText = `This post will be editted - ${Math.random()
     .toString(36)
     .substring(7)}`;
@@ -176,26 +168,17 @@ test("Should edit a post", async ({ page }) => {
   await page.locator('input[placeholder="Title"]').evaluate((el) => el.blur());
 
   const createButton = page.locator('.chakra-portal button:text("Create")');
-  await createButton.click();
 
-  try {
-    await page.waitForResponse(
-      (response) =>
-        response.url() === USER_POSTS_SERVER &&
-        response.status() === STATUS_CODE_SUCCESS
-    );
-  } catch (error) {
-    console.error("200 response for creating a post was not received:", error);
-  }
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        res.url().includes(USER_POSTS_SERVER) &&
+        res.status() === STATUS_CODE_SUCCESS
+    ),
+    createButton.click(),
+  ]);
 
-  page.on("response", (response) => {
-    if (
-      response.url() === ALL_POST_SERVER &&
-      response.status() === STATUS_CODE_SUCCESS
-    ) {
-      isPostEditted = true;
-    }
-  });
+  expect(response.status()).toBe(STATUS_CODE_SUCCESS);
 
   const postsContainer = page.locator("div.css-189aeu6");
   const specificPostDivLocator = postsContainer.locator(
@@ -215,29 +198,25 @@ test("Should edit a post", async ({ page }) => {
     await page.waitForSelector('input[placeholder="Title"]', {
       state: "visible",
     });
-    await page.waitForSelector('textarea[placeholder="Post Text"]', {
+    await page.waitForSelector('textarea[placeholder="Post text"]', {
       state: "visible",
     });
 
-    await page.fill('input[placeholder="Title"]', "Editted title");
-    await page.fill('textarea[placeholder="Post text"]', "Editted title");
+    await page.fill('input[placeholder="Title"]', createdPostTitle);
+    await page.fill('textarea[placeholder="Post text"]', postText);
 
-    const response = await request.delete(`url/data`);
+    const saveButton = page.locator('button:text("Save")');
 
-    // Assert that the API call was successful
-    expect(response.ok()).toBeTruthy(); // Checks for 2xx status code
-    expect(response.status()).toBe(200);
-
-    const saveButton = page.locator('.chakra-portal button:text("Save")');
-    await saveButton.click();
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (res) =>
+          res.url().includes(HOMEPAGE_POST_SERVER) &&
+          res.status() === STATUS_CODE_SUCCESS
+      ),
+      saveButton.click(),
+    ]);
+    expect(response.status()).toBe(STATUS_CODE_SUCCESS);
   } else {
     console.error("Error: Could not retrieve ID for the specific post div.");
   }
 });
-
-// test("Should delete everything", async ({ request }) => {
-//   const response = await request.delete(`${ALL_DATA}`);
-
-//   expect(response.ok()).toBeTruthy();
-//   expect(response.status()).toBe(200);
-// });
