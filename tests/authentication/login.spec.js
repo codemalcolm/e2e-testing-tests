@@ -8,12 +8,12 @@ import {
   UNKNOWN_USER,
   STATUS_CODE_SUCCESS,
   STATUS_CODE_BAD_REQUEST,
-  register,
-  ALL_DATA
+  uiRegister,
 } from "../utility";
 
+
 test.beforeEach(async ({ page }) => {
-  await register(page, USER);
+  await uiRegister(page, USER);
 });
 
 test("Should allow to login User", async ({ page }) => {
@@ -40,10 +40,10 @@ test("Should deny access without an unregistered user", async ({ page }) => {
 
   const [response] = await Promise.all([
     page.waitForResponse(
-      (res) => 
+      (res) =>
         res.url() === LOGIN_SERVER && res.status() === STATUS_CODE_BAD_REQUEST
     ),
-     page.click('button:text("Login")'),
+    page.click('button:text("Login")'),
   ]);
 
   expect(response.status()).toBe(STATUS_CODE_BAD_REQUEST)
@@ -76,12 +76,3 @@ test("should return user info", async ({ page }) => {
 
   await expect(page.locator("text=Username: " + USER.username)).toBeVisible();
 });
-
-test.afterEach(async ({ request }) => {
-
-  const response = await request.delete(`${ALL_DATA}`);
-
-  expect(response.ok()).toBeTruthy();
-  expect(response.status()).toBe(STATUS_CODE_SUCCESS);
-
-})

@@ -5,16 +5,12 @@ import {
 import {
   DASHBOARD_CLIENT,
   DASHBOARD_SERVER,
-} from "../url";
-import {
-  STATUS_CODE_FORBIDDEN,
-} from "../statuscode";
+  STATUS_CODE_FORBIDDEN
+} from "../utility";
 
-// Checking for a 403 status code from a network response
 test("Should not allow to access Dashboard", async ({ page }) => {
   let isForbidden = false;
 
-  // server port is 5000
   page.on("response", (response) => {
     if (
       response.url() === DASHBOARD_SERVER &&
@@ -24,7 +20,6 @@ test("Should not allow to access Dashboard", async ({ page }) => {
     }
   });
 
-  // navigating to actual /dashboard FE route
   await page.goto(DASHBOARD_CLIENT);
 
   await page
