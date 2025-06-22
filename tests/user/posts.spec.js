@@ -77,7 +77,7 @@ test("Should create a new post", async ({ page }) => {
   await page.locator('input[placeholder="Title"]').evaluate((el) => el.blur());
 
   const createButton = page.locator('.chakra-portal button:text("Create")');
-  
+
   const [response] = await Promise.all([
     page.waitForResponse(
       (res) =>
@@ -111,26 +111,17 @@ test("Should delete a post", async ({ page }) => {
   await page.locator('input[placeholder="Title"]').evaluate((el) => el.blur());
 
   const createButton = page.locator('.chakra-portal button:text("Create")');
-  await createButton.click();
-  let isPostDeleted = false;
-  try {
-    await page.waitForResponse(
-      (response) =>
-        response.url() === USER_POSTS_SERVER &&
-        response.status() === STATUS_CODE_SUCCESS
-    );
-  } catch (error) {
-    console.error("200 response for deleting a post was not received:", error);
-  }
 
-  page.on("response", (response) => {
-    if (
-      response.url() === ALL_POST_SERVER &&
-      response.status() === STATUS_CODE_SUCCESS
-    ) {
-      isPostDeleted = true;
-    }
-  });
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        res.url().includes(USER_POSTS_SERVER) &&
+        res.status() === STATUS_CODE_SUCCESS
+    ),
+    createButton.click(),
+  ]);
+
+  expect(response.status()).toBe(STATUS_CODE_SUCCESS);
 
   const postsContainer = page.locator("div.css-189aeu6");
   const specificPostDivLocator = postsContainer.locator(
@@ -141,26 +132,21 @@ test("Should delete a post", async ({ page }) => {
   const postIdToDelete = await specificPostDivLocator.getAttribute("id");
 
   if (postIdToDelete) {
-    const deleteButtonLocator = specificPostDivLocator.locator(
+    const deleteButton = specificPostDivLocator.locator(
       'button:has-text("Delete")'
     );
-    await expect(deleteButtonLocator).toBeEnabled();
-    await deleteButtonLocator.click();
+    await expect(deleteButton).toBeEnabled();
 
-    try {
-      await page.waitForResponse(
-        (response) =>
-          response.url() === incudes(ALL_POST_SERVER) &&
-          response.status() === STATUS_CODE_SUCCESS
-      );
-    } catch (error) {
-      console.error(
-        "200 response for deleting a post was not received:",
-        error
-      );
-    }
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (res) =>
+          res.url().includes(ALL_POST_SERVER) &&
+          res.status() === STATUS_CODE_SUCCESS
+      ),
+      deleteButton.click(),
+    ]);
 
-    await expect(isPostDeleted).toBe(true);
+    expect(response.status()).toBe(STATUS_CODE_SUCCESS);
     await expect(specificPostDivLocator).not.toBeVisible();
   } else {
     console.error("Error: Could not retrieve ID for the specific post div.");
