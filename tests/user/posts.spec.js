@@ -5,15 +5,14 @@ import {
   USER_INFO_CLIENT,
   USER_POSTS_SERVER,
   ALL_POST_SERVER,
-  ALL_DATA,
   REGISTER_CLIENT,
   REGISTER_SERVER,
-} from "../url";
-import { STATUS_CODE_CREATED, STATUS_CODE_SUCCESS } from "../statuscode";
-import { USER } from "../user-data";
-import { HOMEPAGE_POST_SERVER } from "../utility";
+  STATUS_CODE_CREATED, 
+  STATUS_CODE_SUCCESS,
+  USER,
+  HOMEPAGE_POST_SERVER
+} from "../utility";
 
-// TODO : CLEAN UP THIS CODE !
 
 async function register(page, username, password) {
   await page.goto(REGISTER_CLIENT);
