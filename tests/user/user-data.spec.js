@@ -7,11 +7,8 @@ import {
   USER_INFO_SERVER,
   DASHBOARD_CLIENT,
   DASHBOARD_SERVER,
-} from "../url";
-import { STATUS_CODE_SUCCESS, STATUS_CODE_FORBIDDEN } from "../statuscode";
-import { USER } from "../user-data";
-import {
-  ALL_DATA,
+  STATUS_CODE_SUCCESS, STATUS_CODE_FORBIDDEN,
+  USER,
   REGISTER_CLIENT,
   REGISTER_SERVER,
   STATUS_CODE_CREATED,
