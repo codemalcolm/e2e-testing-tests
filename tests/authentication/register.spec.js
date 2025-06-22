@@ -1,7 +1,13 @@
 import { test, expect } from "@playwright/test";
-import { REGISTER_CLIENT, REGISTER_SERVER, ALL_DATA } from "../url";
-import { STATUS_CODE_CREATED, STATUS_CODE_BAD_REQUEST, STATUS_CODE_SUCCESS } from "../statuscode";
-import { USER } from "../user-data";
+import {
+  REGISTER_CLIENT,
+  REGISTER_SERVER,
+  ALL_DATA,
+  STATUS_CODE_CREATED,
+  STATUS_CODE_BAD_REQUEST,
+  STATUS_CODE_SUCCESS,
+  USER
+} from "../utility"
 
 test("Should allow to register User", async ({ page }) => {
   await page.goto(REGISTER_CLIENT);
@@ -40,9 +46,9 @@ test("Should not allow to register User", async ({ page }) => {
   expect(response.status()).toBe(STATUS_CODE_BAD_REQUEST);
 });
 
-test.afterEach(async ({request}) => {
+test.afterEach(async ({ request }) => {
 
- const response = await request.delete(`${ALL_DATA}`);
+  const response = await request.delete(`${ALL_DATA}`);
 
   expect(response.ok()).toBeTruthy();
   expect(response.status()).toBe(STATUS_CODE_SUCCESS);
