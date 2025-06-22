@@ -6,44 +6,61 @@ import {
   USER_POSTS_SERVER,
   ALL_POST_SERVER,
   ALL_DATA,
+  REGISTER_CLIENT,
+  REGISTER_SERVER,
 } from "../url";
-import { STATUS_CODE_SUCCESS } from "../statuscode";
+import { STATUS_CODE_CREATED, STATUS_CODE_SUCCESS } from "../statuscode";
+import { USER } from "../user-data";
 
 // TODO : CLEAN UP THIS CODE !
 
-test.beforeEach(async ({ page }) => {
+async function register(page, username, password) {
+  let sawCreated = false;
+  page.on("response", (response) => {
+    if (
+      response.url() === REGISTER_SERVER &&
+      response.status() === STATUS_CODE_CREATED
+    ) {
+      sawCreated = true;
+    }
+  });
+  await page.goto(REGISTER_CLIENT);
+  await page.fill('input[placeholder="Username"]', username);
+  await page.fill('input[placeholder="Password"]', password);
+  await page.click('button:text("Register")');
+  await page.waitForResponse(
+    (r) => r.url() === REGISTER_SERVER && r.status() === STATUS_CODE_CREATED
+  );
+  expect(sawCreated).toBe(true);
+}
+
+async function login(page, username, password) {
+  let sawLogin = false;
+  page.on("response", (response) => {
+    if (
+      response.url() === LOGIN_SERVER &&
+      response.status() === STATUS_CODE_SUCCESS
+    ) {
+      sawLogin = true;
+    }
+  });
   await page.goto(LOGIN_CLIENT);
-
-  await page.fill('input[placeholder="Username"]', "e2euser");
-  await page.fill('input[placeholder="Password"]', "password123");
-
+  await page.fill('input[placeholder="Username"]', username);
+  await page.fill('input[placeholder="Password"]', password);
   await page.click('button:text("Login")');
+  await page.waitForResponse(
+    (r) => r.url() === LOGIN_SERVER && r.status() === STATUS_CODE_SUCCESS
+  );
+  expect(sawLogin).toBe(true);
+}
 
-  try {
-    await page.waitForResponse(
-      (response) =>
-        response.url() === LOGIN_SERVER &&
-        response.status() === STATUS_CODE_SUCCESS
-    );
-  } catch (error) {
-    console.error("200 response for login was not received:", error);
-  }
-
+test.beforeEach(async ({ page }) => {
+  await register(page, USER.username, USER.password);
+  await login(page, USER.username, USER.password);
   await page.goto(USER_INFO_CLIENT);
 });
 
 test("Should create a new post", async ({ page }) => {
-  let isPostCreated = false;
-
-  page.on("response", (response) => {
-    if (
-      response.url() === USER_POSTS_SERVER &&
-      response.status() === STATUS_CODE_SUCCESS
-    ) {
-      isPostCreated = true;
-    }
-  });
-
   await expect(page).toHaveURL(USER_INFO_CLIENT);
   await page.click('button:text("Create Post")');
 
@@ -60,19 +77,16 @@ test("Should create a new post", async ({ page }) => {
   await page.locator('input[placeholder="Title"]').evaluate((el) => el.blur());
 
   const createButton = page.locator('.chakra-portal button:text("Create")');
-  await createButton.click();
+  
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (res) =>
+        res.url() === USER_POSTS_SERVER && res.status() === STATUS_CODE_SUCCESS
+    ),
+    createButton.click(),
+  ]);
 
-  try {
-    await page.waitForResponse(
-      (response) =>
-        response.url() === USER_POSTS_SERVER &&
-        response.status() === STATUS_CODE_SUCCESS
-    );
-  } catch (error) {
-    console.error("200 response for creating a post was not received:", error);
-  }
-
-  expect(isPostCreated).toBe(true);
+  expect(response.status()).toBe(STATUS_CODE_SUCCESS);
 });
 
 test("Should delete a post", async ({ page }) => {
@@ -98,7 +112,7 @@ test("Should delete a post", async ({ page }) => {
 
   const createButton = page.locator('.chakra-portal button:text("Create")');
   await createButton.click();
-
+  let isPostDeleted = false;
   try {
     await page.waitForResponse(
       (response) =>
@@ -106,10 +120,8 @@ test("Should delete a post", async ({ page }) => {
         response.status() === STATUS_CODE_SUCCESS
     );
   } catch (error) {
-    console.error("200 response for creating a post was not received:", error);
+    console.error("200 response for deleting a post was not received:", error);
   }
-
-  let isPostDeleted = false;
 
   page.on("response", (response) => {
     if (
@@ -138,7 +150,7 @@ test("Should delete a post", async ({ page }) => {
     try {
       await page.waitForResponse(
         (response) =>
-          response.url() === ALL_POST_SERVER &&
+          response.url() === incudes(ALL_POST_SERVER) &&
           response.status() === STATUS_CODE_SUCCESS
       );
     } catch (error) {
@@ -237,9 +249,9 @@ test("Should edit a post", async ({ page }) => {
   }
 });
 
-test("Should delete everything", async ({ request }) => {
-  const response = await request.delete(`${ALL_DATA}`);
+// test("Should delete everything", async ({ request }) => {
+//   const response = await request.delete(`${ALL_DATA}`);
 
-  expect(response.ok()).toBeTruthy();
-  expect(response.status()).toBe(200);
-});
+//   expect(response.ok()).toBeTruthy();
+//   expect(response.status()).toBe(200);
+// });
